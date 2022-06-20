@@ -1,13 +1,13 @@
 import { AnimatePresence, motion, PanInfo } from "framer-motion";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { IGetTvSerieseResult, ITvSeriese } from "../api";
+import { SearchResult } from "../api";
 import { makeImagePath } from "../utils";
 
 const Slider = styled.div`
   position: relative;
-  padding-top: 18%;
+  padding-top: 14%;
 `;
 
 const Row = styled(motion.div)`
@@ -25,7 +25,7 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   background-image: url(${(props) => props.bgPhoto});
   background-size: cover;
   background-position: center center;
-  height: 250px;
+  height: 200px;
   font-size: 66px;
   cursor: pointer;
   &:first-child {
@@ -101,11 +101,11 @@ const boxVariants = {
 };
 
 interface ISliderProps {
-  data: IGetTvSerieseResult;
-  setClickedTvSeriese: Dispatch<SetStateAction<ITvSeriese>>;
+  data: SearchResult[] | undefined;
+  keyword: string | null;
 }
 
-function SlideComponent({ data, setClickedTvSeriese }: ISliderProps) {
+function SearchTvSeriesComponent({ data, keyword }: ISliderProps) {
   const offset = 7;
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -116,7 +116,7 @@ function SlideComponent({ data, setClickedTvSeriese }: ISliderProps) {
     if (data) {
       if (leaving) return;
       toggleLeaving();
-      const totalTvSeries = data.results.length - 1;
+      const totalTvSeries = data.length - 1;
       const maxIndex = Math.floor(totalTvSeries / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
     }
@@ -126,22 +126,14 @@ function SlideComponent({ data, setClickedTvSeriese }: ISliderProps) {
     if (data) {
       if (leaving) return;
       setLeaving(true);
-      const totalTvSeries = data.results.length - 1;
+      const totalTvSeries = data.length - 1;
       const maxIndex = Math.floor(totalTvSeries / offset) - 1;
       setIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
     }
   };
 
-  const onBoxClicked = (tvSeries: ITvSeriese) => {
-    setClickedTvSeriese({
-      id: tvSeries.id,
-      backdrop_path: tvSeries.backdrop_path,
-      poster_path: tvSeries.poster_path,
-      name: tvSeries.name,
-      overview: tvSeries.overview,
-      original_name: "",
-    });
-    history.push(`${process.env.PUBLIC_URL}/tv/${tvSeries.id}`);
+  const onTvSeriesClicked = (tvSeriesId: number) => {
+    history.push(`${process.env.PUBLIC_URL}/search/tv/${tvSeriesId}?keyword=${keyword}`);
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
@@ -179,32 +171,30 @@ function SlideComponent({ data, setClickedTvSeriese }: ISliderProps) {
           transition={{ type: "tween", duration: 1 }}
           key={index}
         >
-          {data?.results
-            .slice(1)
-            .slice(offset * index, offset * index + offset)
-            .map((tvSeries) => (
-              <Box
-                layoutId={tvSeries.id + ""}
-                key={tvSeries.id}
-                whileHover="hover"
-                initial="normal"
-                variants={boxVariants}
-                transition={{ type: "tween" }}
-                onTap={() => onBoxClicked(tvSeries)}
-                bgPhoto={makeImagePath(
-                  tvSeries.backdrop_path ?? tvSeries.poster_path,
-                  "w500"
-                )}
-              >
-                <Info variants={infoVariants}>
-                  <h4>{tvSeries.name}</h4>
-                </Info>
-              </Box>
-            ))}
+          {data &&
+            data
+              .slice(1)
+              .slice(offset * index, offset * index + offset)
+              .map((tvSeries) => (
+                <Box
+                  layoutId={tvSeries.id + ""}
+                  key={tvSeries.id}
+                  whileHover="hover"
+                  initial="normal"
+                  variants={boxVariants}
+                  transition={{ type: "tween" }}
+                  onTap={() => onTvSeriesClicked(tvSeries.id)}
+                  bgPhoto={makeImagePath(tvSeries.poster_path, "w500")}
+                >
+                  <Info variants={infoVariants}>
+                    <h4>{tvSeries.title}</h4>
+                  </Info>
+                </Box>
+              ))}
         </Row>
       </AnimatePresence>
     </Slider>
   );
 }
 
-export default SlideComponent;
+export default SearchTvSeriesComponent;

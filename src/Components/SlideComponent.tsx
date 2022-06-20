@@ -1,13 +1,13 @@
 import { AnimatePresence, motion, PanInfo } from "framer-motion";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { IGetMoviesResult } from "../api";
+import { IGetMoviesResult, IGetSearch, IMovie } from "../api";
 import { makeImagePath } from "../utils";
 
 const Slider = styled.div`
   position: relative;
-  padding-top: 14%;
+  padding-top: 18%;
 `;
 
 const Row = styled(motion.div)`
@@ -25,7 +25,7 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   background-image: url(${(props) => props.bgPhoto});
   background-size: cover;
   background-position: center center;
-  height: 200px;
+  height: 250px;
   font-size: 66px;
   cursor: pointer;
   &:first-child {
@@ -102,9 +102,10 @@ const boxVariants = {
 
 interface ISliderProps {
   data: IGetMoviesResult;
+  setClickedMovie: Dispatch<SetStateAction<IMovie>>;
 }
 
-function SlideComponent({ data }: ISliderProps) {
+function SlideComponent({ data, setClickedMovie }: ISliderProps) {
   const offset = 7;
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -131,8 +132,16 @@ function SlideComponent({ data }: ISliderProps) {
     }
   };
 
-  const onBoxClicked = (movieId: number) => {
-    history.push(`${process.env.PUBLIC_URL}/movies/${movieId}`);
+  const onBoxClicked = (movie: IMovie) => {
+    setClickedMovie({
+      id: movie.id,
+      backdrop_path: movie.backdrop_path,
+      poster_path: movie.poster_path,
+      title: movie.title,
+      overview: movie.overview,
+      original_title: movie.original_title,
+    });
+    history.push(`${process.env.PUBLIC_URL}/movies/${movie.id}`);
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
@@ -181,8 +190,8 @@ function SlideComponent({ data }: ISliderProps) {
                 initial="normal"
                 variants={boxVariants}
                 transition={{ type: "tween" }}
-                onTap={() => onBoxClicked(movie.id)}
-                bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
+                onTap={() => onBoxClicked(movie)}
+                bgPhoto={makeImagePath(movie.poster_path, "w500")}
               >
                 <Info variants={infoVariants}>
                   <h4>{movie.title}</h4>

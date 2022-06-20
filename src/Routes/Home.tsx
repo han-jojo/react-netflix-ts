@@ -6,6 +6,7 @@ import {
   getTopMovies,
   getUpcomingMovies,
   IGetMoviesResult,
+  IMovie,
 } from "../api";
 import { makeImagePath } from "../utils";
 import { useEffect, useState } from "react";
@@ -109,6 +110,16 @@ const BigTitle = styled.h3`
   top: -80px;
 `;
 
+const SmallTitle = styled.h5`
+  color: ${(props) => props.theme.white.lighter};
+  padding: 20px;
+  top: -80px;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 400;
+  position: relative;
+`;
+
 const BigOverview = styled.p`
   padding: 20px;
   position: relative;
@@ -145,22 +156,49 @@ function Home() {
       getUpcomingMovies()
     );
 
-  const bigMovieMatch = useRouteMatch<{ movieId: string }>(
+  const movieDetailMatch = useRouteMatch<{ movieId: string }>(
     `${process.env.PUBLIC_URL}/movies/:movieId`
   );
 
   const { scrollY } = useViewportScroll();
   const history = useHistory();
+  const [clickedMovie, setClickedMovie] = useState<IMovie>({
+    id: 0,
+    backdrop_path: "",
+    poster_path: "",
+    title: "",
+    overview: "",
+    original_title: "",
+  });
 
-  const onBoxClicked = (movieId: number) => {
-    history.push(`${process.env.PUBLIC_URL}/movies/${movieId}`);
+  const onBoxClicked = (movie: any) => {
+    setClickedMovie({
+      id: movie.id,
+      backdrop_path: movie.backdrop_path,
+      poster_path: movie.poster_path,
+      title: movie.title,
+      overview: movie.overview,
+      original_title: movie.original_title,
+    });
+
+    history.push(`${process.env.PUBLIC_URL}/movies/${movie.id}`);
   };
 
-  const onOverlayClick = () => history.push(`${process.env.PUBLIC_URL}`);
+  const onOverlayClick = () => {
+    setClickedMovie({
+      id: 0,
+      backdrop_path: "",
+      poster_path: "",
+      title: "",
+      overview: "",
+      original_title: "",
+    });
+    history.push(`${process.env.PUBLIC_URL}`);
+  };
 
-  const clickedMovie =
-    bigMovieMatch?.params.movieId &&
-    data?.results.find((movie) => movie.id === +bigMovieMatch.params.movieId);
+  useEffect(() => {
+    console.log("data: ", data);
+  }, [data]);
 
   return (
     <Wrapper>
@@ -177,7 +215,7 @@ function Home() {
                 variants={boxVariants}
                 initial="normal"
                 transition={{ type: "tween" }}
-                onTap={() => onBoxClicked(data?.results[0].id!)}
+                onTap={() => onBoxClicked(data?.results[0])}
                 layoutId={data?.results[0].id + ""}
               >
                 자세히 보기
@@ -188,20 +226,26 @@ function Home() {
           <GroupSection>
             <SlideGroup>
               <SlideTitle>현재 상영 중</SlideTitle>
-              <SlideComponent data={data!} />
+              <SlideComponent data={data!} setClickedMovie={setClickedMovie} />
             </SlideGroup>
             <SlideGroup>
               <SlideTitle>가장 평점이 높은</SlideTitle>
-              <SlideComponent data={topRatedMovie!} />
+              <SlideComponent
+                data={topRatedMovie!}
+                setClickedMovie={setClickedMovie}
+              />
             </SlideGroup>
             <SlideGroup>
               <SlideTitle>개봉 예정</SlideTitle>
-              <SlideComponent data={upcomingMovie!} />
+              <SlideComponent
+                data={upcomingMovie!}
+                setClickedMovie={setClickedMovie}
+              />
             </SlideGroup>
           </GroupSection>
           {/* 미디어 디테일 */}
           <AnimatePresence>
-            {bigMovieMatch ? (
+            {movieDetailMatch ? (
               <>
                 <Overlay
                   onClick={onOverlayClick}
@@ -210,19 +254,20 @@ function Home() {
                 />
                 <BigMovie
                   style={{ top: scrollY.get() + 100 }}
-                  layoutId={bigMovieMatch.params.movieId}
+                  layoutId={movieDetailMatch.params.movieId}
                 >
                   {clickedMovie && (
                     <>
                       <BigCover
                         style={{
                           backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
-                            clickedMovie.backdrop_path,
+                            clickedMovie.poster_path,
                             "w500"
                           )})`,
                         }}
                       />
                       <BigTitle>{clickedMovie.title}</BigTitle>
+                      <SmallTitle>{clickedMovie.original_title}</SmallTitle>
                       <BigOverview>{clickedMovie.overview}</BigOverview>
                     </>
                   )}

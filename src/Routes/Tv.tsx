@@ -6,6 +6,7 @@ import {
   getPopularTvSeries,
   getTopRatedTvSeries,
   IGetTvSerieseResult,
+  ITvSeriese,
 } from "../api";
 import { makeImagePath } from "../utils";
 import { useEffect, useState } from "react";
@@ -109,6 +110,16 @@ const BigTitle = styled.h3`
   top: -80px;
 `;
 
+const SmallTitle = styled.h5`
+  color: ${(props) => props.theme.white.lighter};
+  padding: 20px;
+  top: -80px;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 400;
+  position: relative;
+`;
+
 const BigOverview = styled.p`
   padding: 20px;
   position: relative;
@@ -147,28 +158,47 @@ function Tv() {
       getTopRatedTvSeries()
     );
 
-  useEffect(() => {
-    console.log("tv data", topRated);
-  }, [topRated]);
-
   const { scrollY } = useViewportScroll();
   const history = useHistory();
-
+  const [clickedTvSeries, setClickedTvSeriese] = useState<ITvSeriese>({
+    id: 0,
+    backdrop_path: "",
+    poster_path: "",
+    name: "",
+    overview: "",
+    original_name: "",
+  });
   const tvDetailMatch = useRouteMatch<{ tvSeriesId: string }>(
     `${process.env.PUBLIC_URL}/tv/:tvSeriesId`
   );
 
-  const onBoxClicked = (tvSeriesId: number) => {
-    history.push(`${process.env.PUBLIC_URL}/tv/${tvSeriesId}`);
+  const onBoxClicked = (tvSeries: any) => {
+    setClickedTvSeriese({
+      id: tvSeries.id,
+      backdrop_path: tvSeries.backdrop_path,
+      poster_path: tvSeries.poster_path,
+      name: tvSeries.name,
+      overview: tvSeries.overview,
+      original_name: tvSeries.original_name,
+    });
+    history.push(`${process.env.PUBLIC_URL}/tv/${tvSeries.id}`);
   };
 
-  const onOverlayClick = () => history.push(`${process.env.PUBLIC_URL}/tv`);
+  const onOverlayClick = () => {
+    setClickedTvSeriese({
+      id: 0,
+      backdrop_path: "",
+      poster_path: "",
+      name: "",
+      overview: "",
+      original_name: "",
+    });
+    history.push(`${process.env.PUBLIC_URL}/tv`);
+  };
 
-  const clickedTvSeries =
-    tvDetailMatch?.params.tvSeriesId &&
-    latest?.results.find(
-      (tvSeries) => tvSeries.id === +tvDetailMatch.params.tvSeriesId
-    );
+  useEffect(() => {
+    console.log("data: ", latest);
+  }, [latest]);
 
   return (
     <Wrapper>
@@ -187,7 +217,7 @@ function Tv() {
                 variants={boxVariants}
                 initial="normal"
                 transition={{ type: "tween" }}
-                onTap={() => onBoxClicked(latest?.results[0].id!)}
+                onTap={() => onBoxClicked(latest?.results[0])}
                 layoutId={latest?.results[0].id + ""}
               >
                 자세히 보기
@@ -198,15 +228,24 @@ function Tv() {
           <GroupSection>
             <SlideGroup>
               <SlideTitle>현재 방영 중</SlideTitle>
-              <SlideComponent data={latest!} />
+              <SlideComponent
+                data={latest!}
+                setClickedTvSeriese={setClickedTvSeriese}
+              />
             </SlideGroup>
             <SlideGroup>
               <SlideTitle>인기가 많은</SlideTitle>
-              <SlideComponent data={popular!} />
+              <SlideComponent
+                data={popular!}
+                setClickedTvSeriese={setClickedTvSeriese}
+              />
             </SlideGroup>
             <SlideGroup>
               <SlideTitle>가장 평점이 높은</SlideTitle>
-              <SlideComponent data={topRated!} />
+              <SlideComponent
+                data={topRated!}
+                setClickedTvSeriese={setClickedTvSeriese}
+              />
             </SlideGroup>
           </GroupSection>
           {/* 미디어 디테일 */}
@@ -227,13 +266,13 @@ function Tv() {
                       <BigCover
                         style={{
                           backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
-                            clickedTvSeries.backdrop_path ??
-                              clickedTvSeries.poster_path,
+                            clickedTvSeries.poster_path,
                             "w500"
                           )})`,
                         }}
                       />
                       <BigTitle>{clickedTvSeries.name}</BigTitle>
+                      <SmallTitle>{clickedTvSeries.original_name}</SmallTitle>
                       <BigOverview>{clickedTvSeries.overview}</BigOverview>
                     </>
                   )}

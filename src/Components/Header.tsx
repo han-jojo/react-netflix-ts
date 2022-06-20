@@ -112,11 +112,13 @@ interface IForm {
 
 function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { scrollY } = useViewportScroll();
   const homeMatch = useRouteMatch(`${process.env.PUBLIC_URL}/`);
   const tvMatch = useRouteMatch(`${process.env.PUBLIC_URL}/tv`);
   const inputAnimation = useAnimation();
   const navAnimation = useAnimation();
-  const { scrollY } = useViewportScroll();
+  const history = useHistory();
+
   const toggleSearch = () => {
     if (searchOpen) {
       inputAnimation.start({
@@ -127,6 +129,7 @@ function Header() {
     }
     setSearchOpen((prev) => !prev);
   };
+
   useEffect(() => {
     scrollY.onChange(() => {
       if (scrollY.get() > 80) {
@@ -136,11 +139,13 @@ function Header() {
       }
     });
   }, [scrollY, navAnimation]);
-  const history = useHistory();
+
   const { register, handleSubmit } = useForm<IForm>();
+
   const onValid = (data: IForm) => {
-    history.push(`/search?keyword=${data.keyword}`);
+    history.push(`${process.env.PUBLIC_URL}/search?keyword=${data.keyword}`);
   };
+
   return (
     <Nav variants={navVariants} animate={navAnimation} initial={"top"}>
       <Col>
@@ -172,7 +177,7 @@ function Header() {
         <Search onSubmit={handleSubmit(onValid)}>
           <motion.svg
             onClick={toggleSearch}
-            animate={{ x: searchOpen ? -185 : 0 }}
+            animate={{ x: searchOpen ? -215 : 0 }}
             transition={{ type: "linear" }}
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -189,7 +194,7 @@ function Header() {
             animate={inputAnimation}
             initial={{ scaleX: 0 }}
             transition={{ type: "linear" }}
-            placeholder="Search for movie or tv show..."
+            placeholder="영화, TV 드라마 등"
           />
         </Search>
       </Col>
