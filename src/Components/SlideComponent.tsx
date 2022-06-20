@@ -2,7 +2,7 @@ import { AnimatePresence, motion, PanInfo } from "framer-motion";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { IGetMoviesResult, IGetSearch, IMovie } from "../api";
+import { IGetMoviesResult, IMovie } from "../api";
 import { makeImagePath } from "../utils";
 
 const Slider = styled.div`
