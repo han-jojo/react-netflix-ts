@@ -149,10 +149,6 @@ function Home() {
     `${process.env.PUBLIC_URL}/movies/:movieId`
   );
 
-  useEffect(() => {
-    console.log("movie Data: ", data);
-  }, [data]);
-
   const { scrollY } = useViewportScroll();
   const history = useHistory();
 

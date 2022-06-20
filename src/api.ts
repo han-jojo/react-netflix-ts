@@ -38,3 +38,37 @@ export function getUpcomingMovies() {
     (response) => response.json()
   );
 }
+
+interface ITvSeriese {
+  id: number;
+  backdrop_path: string;
+  poster_path: string;
+  name: string;
+  overview: string;
+}
+
+export interface IGetTvSerieseResult {
+  page: number;
+  results: ITvSeriese[];
+  total_pages: number;
+  total_results: number;
+}
+
+//On the /tv (tv series) page implement sliders for: Latest tv, Top Rated tv and Upcoming tv.
+export function getLatestTvSeries() {
+  return fetch(`${BASE_PATH}/tv/on_the_air?api_key=${API_KEY}&language=ko`).then(
+    (response) => response.json()
+  );
+}
+
+export function getPopularTvSeries() {
+  return fetch(`${BASE_PATH}/tv/popular?api_key=${API_KEY}&language=ko`).then(
+    (response) => response.json()
+  );
+}
+
+export function getTopRatedTvSeries() {
+  return fetch(`${BASE_PATH}/tv/top_rated?api_key=${API_KEY}&language=ko`).then(
+    (response) => response.json()
+  );
+}

@@ -112,8 +112,8 @@ interface IForm {
 
 function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
-  const homeMatch = useRouteMatch("/");
-  const tvMatch = useRouteMatch("/tv");
+  const homeMatch = useRouteMatch(`${process.env.PUBLIC_URL}/`);
+  const tvMatch = useRouteMatch(`${process.env.PUBLIC_URL}/tv`);
   const inputAnimation = useAnimation();
   const navAnimation = useAnimation();
   const { scrollY } = useViewportScroll();

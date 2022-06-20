@@ -9,11 +9,16 @@ function App() {
     <Router>
       <Header />
       <Switch>
-        <Route path={`${process.env.PUBLIC_URL}/tv`}>
-          <Tv />
-        </Route>
         <Route path={`${process.env.PUBLIC_URL}/search`}>
           <Search />
+        </Route>
+        <Route
+          path={[
+            `${process.env.PUBLIC_URL}/tv`,
+            `${process.env.PUBLIC_URL}/tv/:tvSeriesId`,
+          ]}
+        >
+          <Tv />
         </Route>
         <Route
           path={[

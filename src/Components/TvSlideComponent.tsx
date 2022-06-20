@@ -2,7 +2,7 @@ import { AnimatePresence, motion, PanInfo } from "framer-motion";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
-import { IGetMoviesResult } from "../api";
+import { IGetTvSerieseResult } from "../api";
 import { makeImagePath } from "../utils";
 
 const Slider = styled.div`
@@ -101,7 +101,7 @@ const boxVariants = {
 };
 
 interface ISliderProps {
-  data: IGetMoviesResult;
+  data: IGetTvSerieseResult;
 }
 
 function SlideComponent({ data }: ISliderProps) {
@@ -115,8 +115,8 @@ function SlideComponent({ data }: ISliderProps) {
     if (data) {
       if (leaving) return;
       toggleLeaving();
-      const totalMovies = data.results.length - 1;
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
+      const totalTvSeries = data.results.length - 1;
+      const maxIndex = Math.floor(totalTvSeries / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
     }
   };
@@ -125,14 +125,14 @@ function SlideComponent({ data }: ISliderProps) {
     if (data) {
       if (leaving) return;
       setLeaving(true);
-      const totalMovies = data.results.length - 1;
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
+      const totalTvSeries = data.results.length - 1;
+      const maxIndex = Math.floor(totalTvSeries / offset) - 1;
       setIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
     }
   };
 
-  const onBoxClicked = (movieId: number) => {
-    history.push(`${process.env.PUBLIC_URL}/movies/${movieId}`);
+  const onBoxClicked = (tvSeriesId: number) => {
+    history.push(`${process.env.PUBLIC_URL}/tv/${tvSeriesId}`);
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
@@ -173,19 +173,22 @@ function SlideComponent({ data }: ISliderProps) {
           {data?.results
             .slice(1)
             .slice(offset * index, offset * index + offset)
-            .map((movie) => (
+            .map((tvSeries) => (
               <Box
-                layoutId={movie.id + ""}
-                key={movie.id}
+                layoutId={tvSeries.id + ""}
+                key={tvSeries.id}
                 whileHover="hover"
                 initial="normal"
                 variants={boxVariants}
                 transition={{ type: "tween" }}
-                onTap={() => onBoxClicked(movie.id)}
-                bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
+                onTap={() => onBoxClicked(tvSeries.id)}
+                bgPhoto={makeImagePath(
+                  tvSeries.backdrop_path ?? tvSeries.poster_path,
+                  "w500"
+                )}
               >
                 <Info variants={infoVariants}>
-                  <h4>{movie.title}</h4>
+                  <h4>{tvSeries.name}</h4>
                 </Info>
               </Box>
             ))}
